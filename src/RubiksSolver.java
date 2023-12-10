@@ -1,7 +1,7 @@
-import java.io.*;
+
 // add jar files for 
 //import org.ejml.simple.*;
-import java.lang.*;
+
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,6 +28,29 @@ public class RubiksSolver {
     private Cube input;
     private static long check = 0;
 
+    public Queue<Cube> getFrontQueue(){
+        return myqueue_front;
+    }
+
+    public Queue<Cube> getBackQueue(){
+        return myqueue_back;
+    }
+
+    public int getQueueBackSize(){
+        return myqueue_back.size();
+    }
+
+    public int getQueueFrontSize(){
+        return myqueue_front.size();
+    }
+
+    public boolean getSolution(){
+        return solution;
+    }
+
+    public static long getCheck(){
+        return check;
+    }
     public RubiksSolver() {
         myqueue = new LinkedList<>();
         myqueue_back = new LinkedList<>();
@@ -60,7 +83,8 @@ public class RubiksSolver {
     // not complete, see line 166 in c++ file for proper threading
     public void pushIn(Cube c, int mode) {
         c.computeCost(); 
-
+        // thinking that mode 1 is breadth-first to be verified
+        // and mode 2 is depth-first with 4 threads
         switch (mode) {
             case 1:
                 myqueue_front.offer(c);
@@ -70,9 +94,11 @@ public class RubiksSolver {
                 int threadNum = getCurrentThreadNum(); // This is a placeholder
                 mystack[threadNum].push(c);
                 break;
+            // solved to scrambled
             case 0:
                 myqueue_back.offer(c);
                 break;
+            // creating the hash map
             case 3:
                 // Replace omp_get_thread_num() with appropriate thread identification logic in Java
                 threadNum = getCurrentThreadNum(); // This is a placeholder
@@ -87,15 +113,15 @@ public class RubiksSolver {
     private int getCurrentThreadNum() {
         // Implement thread identification logic
         // Placeholder return
-        return 0;
+        return (int) Thread.currentThread().getId();
     }
 
 
+    
     public void generateQueue(int limit, Cube input, Queue<Cube> myqueue, int mode) {
         if (mode == 3) {
             input.setFace("");
         }
-
         input.computeCost();
         myqueue.offer(input);
 
@@ -270,7 +296,10 @@ public class RubiksSolver {
                     if (temp.getCost() == 0) {
                         continue;
                     }
-                    generateQueue(temp.getLevel(), temp, queueForHash[index % queueForHash.length], 3);
+                    //generateQueue(temp.getLevel(), temp, queueForHash[index % queueForHash.length], 3);
+                    Queue<Cube> tempQueue = queueForHash[index % queueForHash.length];
+                    generateQueue(temp.getLevel(), temp, tempQueue, 3);
+                
                 }
             });
         }
@@ -393,14 +422,23 @@ public class RubiksSolver {
         solved.setRight(new int[][]{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}});
         solved.setDown(new int[][]{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}});
 
-        // Setting up the input cube
         input.setLevel(0);
+        input.setUp(new int[][]{{6, 6, 6}, {6, 6, 6}, {6, 6, 6}});
+        input.setFront(new int[][]{{4, 4, 4}, {5, 5, 5}, {5, 5, 5}});
+        input.setLeft(new int[][]{{3, 3, 3}, {4, 4, 4}, {4, 4, 4}});
+        input.setBack(new int[][]{{2, 2, 2}, {3, 3, 3}, {3, 3, 3}});
+        input.setRight(new int[][]{{5, 5, 5}, {2, 2, 2}, {2, 2, 2}});
+        input.setDown(new int[][]{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}});
+
+        // Setting up the input cube
+        /*input.setLevel(0);
         input.setUp(new int[][]{{1, 6, 6}, {4, 6, 4}, {1, 6, 5}});
         input.setFront(new int[][]{{5, 3, 6}, {1, 5, 2}, {3, 1, 2}});
         input.setLeft(new int[][]{{2, 5, 2}, {2, 4, 5}, {2, 1, 1}});
         input.setBack(new int[][]{{4, 4, 3}, {6, 3, 3}, {5, 6, 3}});
         input.setRight(new int[][]{{4, 3, 3}, {5, 2, 2}, {5, 3, 4}});
         input.setDown(new int[][]{{4, 2, 6}, {4, 1, 1}, {6, 5, 1}});
+        */
 
 
         // Setting up the executor service for parallel tasks
@@ -409,12 +447,14 @@ public class RubiksSolver {
         // Submitting two tasks to the executorService, one for each thread
         executorService.submit(() -> {
             System.out.println("Thread 1 running");
-            solver.generateQueue(limitBFS, input, myqueue_front, 1);
+            Queue<Cube> tempQueue = solver.getFrontQueue();
+            solver.generateQueue(limitBFS, input, tempQueue,1);
         });
 
         executorService.submit(() -> {
             System.out.println("Thread 2 running");
-            solver.generateQueue(hashlen, solved, myqueue_back, 0);
+            Queue<Cube> tempQueue = solver.getBackQueue();
+            solver.generateQueue(hashlen, solved, tempQueue,0) ;
             System.out.println("Size of queue: " + solver.getQueueBackSize());
             solver.pushInHashMap();
         });
@@ -429,7 +469,7 @@ public class RubiksSolver {
         solver.optimiseHash();
 
         // If a solution has not been found, proceed with depth-first search
-        if (!solver.isSolutionFound()) {
+        if (!solver.getSolution()) {
             solver.depthFirstSearch(limitDFS, 2);
         }
 
