@@ -83,7 +83,8 @@ public class RubiksSolver {
     // not complete, see line 166 in c++ file for proper threading
     public void pushIn(Cube c, int mode) {
         c.computeCost(); 
-
+        // thinking that mode 1 is breadth-first to be verified
+        // and mode 2 is depth-first with 4 threads
         switch (mode) {
             case 1:
                 myqueue_front.offer(c);
@@ -93,9 +94,11 @@ public class RubiksSolver {
                 int threadNum = getCurrentThreadNum(); // This is a placeholder
                 mystack[threadNum].push(c);
                 break;
+            // solved to scrambled
             case 0:
                 myqueue_back.offer(c);
                 break;
+            // creating the hash map
             case 3:
                 // Replace omp_get_thread_num() with appropriate thread identification logic in Java
                 threadNum = getCurrentThreadNum(); // This is a placeholder
@@ -110,7 +113,7 @@ public class RubiksSolver {
     private int getCurrentThreadNum() {
         // Implement thread identification logic
         // Placeholder return
-        return 0;
+        return (int) Thread.currentThread().getId();
     }
 
 
@@ -419,14 +422,23 @@ public class RubiksSolver {
         solved.setRight(new int[][]{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}});
         solved.setDown(new int[][]{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}});
 
-        // Setting up the input cube
         input.setLevel(0);
+        input.setUp(new int[][]{{6, 6, 6}, {6, 6, 6}, {6, 6, 6}});
+        input.setFront(new int[][]{{4, 4, 4}, {5, 5, 5}, {5, 5, 5}});
+        input.setLeft(new int[][]{{3, 3, 3}, {4, 4, 4}, {4, 4, 4}});
+        input.setBack(new int[][]{{2, 2, 2}, {3, 3, 3}, {3, 3, 3}});
+        input.setRight(new int[][]{{5, 5, 5}, {2, 2, 2}, {2, 2, 2}});
+        input.setDown(new int[][]{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}});
+
+        // Setting up the input cube
+        /*input.setLevel(0);
         input.setUp(new int[][]{{1, 6, 6}, {4, 6, 4}, {1, 6, 5}});
         input.setFront(new int[][]{{5, 3, 6}, {1, 5, 2}, {3, 1, 2}});
         input.setLeft(new int[][]{{2, 5, 2}, {2, 4, 5}, {2, 1, 1}});
         input.setBack(new int[][]{{4, 4, 3}, {6, 3, 3}, {5, 6, 3}});
         input.setRight(new int[][]{{4, 3, 3}, {5, 2, 2}, {5, 3, 4}});
         input.setDown(new int[][]{{4, 2, 6}, {4, 1, 1}, {6, 5, 1}});
+        */
 
 
         // Setting up the executor service for parallel tasks
