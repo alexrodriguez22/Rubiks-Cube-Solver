@@ -1,7 +1,7 @@
-import java.io.*;
+
 // add jar files for 
 //import org.ejml.simple.*;
-import java.lang.*;
+
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,6 +28,29 @@ public class RubiksSolver {
     private Cube input;
     private static long check = 0;
 
+    public Queue<Cube> getFrontQueue(){
+        return myqueue_front;
+    }
+
+    public Queue<Cube> getBackQueue(){
+        return myqueue_back;
+    }
+
+    public int getQueueBackSize(){
+        return myqueue_back.size();
+    }
+
+    public int getQueueFrontSize(){
+        return myqueue_front.size();
+    }
+
+    public boolean getSolution(){
+        return solution;
+    }
+
+    public static long getCheck(){
+        return check;
+    }
     public RubiksSolver() {
         myqueue = new LinkedList<>();
         myqueue_back = new LinkedList<>();
@@ -91,11 +114,11 @@ public class RubiksSolver {
     }
 
 
+    
     public void generateQueue(int limit, Cube input, Queue<Cube> myqueue, int mode) {
         if (mode == 3) {
             input.setFace("");
         }
-
         input.computeCost();
         myqueue.offer(input);
 
@@ -270,7 +293,10 @@ public class RubiksSolver {
                     if (temp.getCost() == 0) {
                         continue;
                     }
-                    generateQueue(temp.getLevel(), temp, queueForHash[index % queueForHash.length], 3);
+                    //generateQueue(temp.getLevel(), temp, queueForHash[index % queueForHash.length], 3);
+                    Queue<Cube> tempQueue = queueForHash[index % queueForHash.length];
+                    generateQueue(temp.getLevel(), temp, tempQueue, 3);
+                
                 }
             });
         }
@@ -409,12 +435,14 @@ public class RubiksSolver {
         // Submitting two tasks to the executorService, one for each thread
         executorService.submit(() -> {
             System.out.println("Thread 1 running");
-            solver.generateQueue(limitBFS, input, myqueue_front, 1);
+            Queue<Cube> tempQueue = solver.getFrontQueue();
+            solver.generateQueue(limitBFS, input, tempQueue,1);
         });
 
         executorService.submit(() -> {
             System.out.println("Thread 2 running");
-            solver.generateQueue(hashlen, solved, myqueue_back, 0);
+            Queue<Cube> tempQueue = solver.getBackQueue();
+            solver.generateQueue(hashlen, solved, tempQueue,0) ;
             System.out.println("Size of queue: " + solver.getQueueBackSize());
             solver.pushInHashMap();
         });
@@ -429,7 +457,7 @@ public class RubiksSolver {
         solver.optimiseHash();
 
         // If a solution has not been found, proceed with depth-first search
-        if (!solver.isSolutionFound()) {
+        if (!solver.getSolution()) {
             solver.depthFirstSearch(limitDFS, 2);
         }
 
