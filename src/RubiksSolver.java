@@ -1,7 +1,14 @@
+/* Alex Rodriguez
+ * Abhigyan Tripathi
+ * 
+ * Rubik's Cube Solver
+ */
+
 
 // add jar files for 
 //import org.ejml.simple.*;
 
+// Import necessary libraries and classes
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,14 +16,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
+// Class for solving Rubik's Cube
 public class RubiksSolver {
 
+    // Declarations for counts, modes, and solution status
     public static int countF = 0;
     public static int countF2 = 0;
     public static int countFDash = 0;
     public static int mode = 0; // 0 -> BFS, 1 -> DFS
     public static boolean solution = false;
 
+    // Declarations of various data structures for cube manipulation and storage
     private Queue<Cube> myqueue;
     private Queue<Cube> myqueue_back;
     private Queue<Cube> myqueue_front;
@@ -28,6 +38,7 @@ public class RubiksSolver {
     private Cube input;
     private static long check = 0;
 
+    // Constructors and accessors
     public Queue<Cube> getFrontQueue(){
         return myqueue_front;
     }
@@ -51,6 +62,8 @@ public class RubiksSolver {
     public static long getCheck(){
         return check;
     }
+
+    // Method for pushing cube states into different queues or stacks based on mode
     public RubiksSolver() {
         myqueue = new LinkedList<>();
         myqueue_back = new LinkedList<>();
@@ -80,7 +93,7 @@ public class RubiksSolver {
         input = new Cube(this);
     }
 
-    // not complete, see line 166 in c++ file for proper threading
+    // Method to generate cube states in a queue based on certain parameters
     public void pushIn(Cube c, int mode) {
         c.computeCost(); 
         // thinking that mode 1 is breadth-first to be verified
@@ -109,7 +122,7 @@ public class RubiksSolver {
         }
     }
 
-    // NOT COMPLETE You will need to define getCurrentThreadNum method or equivalent logic
+    // Placeholder method for obtaining the current thread's ID or number.
     private int getCurrentThreadNum() {
         // Implement thread identification logic
         // Placeholder return
@@ -117,7 +130,7 @@ public class RubiksSolver {
     }
 
 
-    
+    // Create cube states, evaluate costs, and add to the queue for exploration.
     public void generateQueue(int limit, Cube input, Queue<Cube> myqueue, int mode) {
         if (mode == 3) {
             input.setFace("");
@@ -181,6 +194,7 @@ public class RubiksSolver {
         }
     }
     
+    // prints elements of the array
     public static boolean arrayMatch(int[] a, int[] b) {
         for (int i = 0; i < a.length; i++) {
             if (a[i] != b[i]) {
@@ -197,6 +211,7 @@ public class RubiksSolver {
         System.out.println(); // This prints the newline character
     }
     
+    // Check cube for a solution path based on a given path string
     public void checkForSolution(String path, Cube c) {
         for (int i = 0; i < path.length(); i++) {
             char move = path.charAt(i);
@@ -234,6 +249,7 @@ public class RubiksSolver {
         }
     }
 
+    // Match cube faces in the hash map, check for solutions, and increment checked cube count.
     public void matchCube(Cube c) {
         long total = 0;
 
@@ -250,6 +266,7 @@ public class RubiksSolver {
         }
     }
 
+    // Print the contents and size of the hash map
     public void printHashMap() {
         long fullCount = 0;
         
@@ -285,6 +302,7 @@ public class RubiksSolver {
         printHashMap(); // Print the state of vectorForHash
     }
 
+    // Optimize the hash map using parallel processing
     public void optimiseHash() {
         ExecutorService executorService = Executors.newFixedThreadPool(4);
 
@@ -313,7 +331,7 @@ public class RubiksSolver {
     }
 
 
-
+    // Perform depth-first search algorithm
     public void depthFirstSearch(int limit, int mode) {
         System.out.println("Depth First Search");
 

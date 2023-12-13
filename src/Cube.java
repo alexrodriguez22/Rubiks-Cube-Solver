@@ -1,4 +1,12 @@
+/* Alex Rodriguez
+ * Abhigyan Tripathi
+ * 
+ * Cube Class
+ */
+
+
 import java.util.*;
+
 
 public class Cube {
     private Deque<Cube>[] mystack;
@@ -14,7 +22,7 @@ public class Cube {
     private int[] faceCost = new int[6];
     private RubiksSolver solver;
 
-
+    // Constructor that initializes the Cube with matrices for each face and other properties
     public Cube(RubiksSolver solver) {
         // Initialize the 3x3 matrices for each face of the cube
         front = new int[3][3];
@@ -30,7 +38,7 @@ public class Cube {
         this.solver = solver;
 
     }
-     // Copy constructor
+     // Copy constructor to create a copy of the Cube
      public Cube(Cube other) {
         this.front = copyFace(other.front);
         this.up = copyFace(other.up);
@@ -41,7 +49,6 @@ public class Cube {
         
         this.face = other.face;
         // Copy any other relevant properties
-        // ...
     
         // Copy or reference the RubiksSolver, depending on your application logic
         this.solver = other.solver;
@@ -89,7 +96,7 @@ public class Cube {
         }
     }
 
-
+    // Setters for individual faces of the Cube
 
     public void setUp(int[][] up) {
         this.up = up;
@@ -116,7 +123,7 @@ public class Cube {
     }
 
 
-
+    // Utility method to copy a face matrix
     private int[][] copyFace(int[][] face) {
         int[][] newFace = new int[face.length][face[0].length];
         for (int i = 0; i < face.length; i++) {
@@ -125,6 +132,7 @@ public class Cube {
         return newFace;
     }
 
+    // Computes the cost of the Cube based on face mismatches
     public int computeCost() {
         int cost = 0;
         int center;
@@ -157,7 +165,7 @@ public class Cube {
         return cost;
     }
     
-
+    // Utility method to count the number of mismatches in a face
     private int countMismatches(int[][] face, int centerValue) {
         int mismatches = 0;
         for (int i = 0; i < face.length; i++) {
@@ -170,7 +178,7 @@ public class Cube {
         return mismatches;
     }
     
-
+    // Prints the configuration of the Cube faces
     public void printCube() {
 
         System.out.println("----------------------Print Cube------------------------------------------------");
@@ -227,7 +235,7 @@ public class Cube {
     }
 
     private static int countF2 = 0;
-
+    
     public void F2(int mode) {
         transposeInPlace(this.front);
         swapColumns(this.front, 0, 2);
@@ -252,6 +260,8 @@ public class Cube {
         this.solver.pushIn(this, mode);
     }
 
+    // Utility methods for face manipulation (transpose, swapColumns, swapRows, reverseInPlace)
+
     private void transposeInPlace(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = i; j < matrix[0].length; j++) {
@@ -269,6 +279,8 @@ public class Cube {
             matrix[i][col2] = temp;
         }
     }
+
+    // Rotation operations on the Cube's faces (F, F2, Fdash, orientL, orientR, orientU, orientD, orientB)
 
     private static int countF = 0;
 
@@ -449,7 +461,6 @@ public class Cube {
         Cube f2 = new Cube(this);
         f2.F2(mode);
 
-        // Do something with f, fDash, and f2, like adding them to a queue
     }
 
     
